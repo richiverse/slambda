@@ -4,19 +4,27 @@
         {
             "Effect": "Allow",
             "Action": [
-                "lambda:GetFunction",
-                "iam:CreateRole",
-                "iam:DeleteRolePolicy",
-                "iam:ListRoles",
-                "iam:PutRolePolicy",
-                "lambda:AddPermission",
-                "lambda:InvokeFunction",
-                "lambda:UpdateFunctionCode",
-                "lambda:CreateFunctionCode",
                 "apigateway:GET",
                 "apigateway:POST",
                 "apigateway:PUT",
-                "apigateway:DELETE"
+                "apigateway:DELETE",
+                "dynamodb:Query",
+                "iam:CreateRole",
+                "iam:DeleteRolePolicy",
+                "iam:ListRoles",
+                "iam:PassRole",
+                "iam:PutRolePolicy",
+                "lambda:AddPermission",
+                "lambda:CreateFunctionCode",
+                "lambda:CreateFunction",
+                "lambda:GetFunction",
+                "lambda:InvokeFunction",
+                "lambda:ListFunctions",
+                "lambda:UpdateFunctionCode",
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:FilterLogEvents"
             ],
             "Resource": "*"
         }

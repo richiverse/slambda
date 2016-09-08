@@ -41,39 +41,40 @@ def _process_text(text):
         '{} -n5'.
         format(text.encode('utf-8').strip()))
 
-def _format_text(text):
-    return '```{}```'.format(text)
+def _format_text(formatted_text, command):
+    return '```{}```\n\n^ /howdoi {}'.format(formatted_text, command)
 
 def _greet(response_url, text='Fetching'):
     requests.post(response_url, data=dumps({'text': text}))
 
-def _is_authenticated_slack(token):
-    env = app.current_request.to_dict()['context']['stage']
-    return token == credstash.getSecret(
-        'HOWDOI_SLACK_TOKEN',
-        context={'env': env})
+def _is_authenticated_slack(token, **kwargs):
+    return token == kwargs['HOWDOI_SLACK_TOKEN']
 
 @app.route('/howdoi/slack')
 def howdoi_slack():
     json = app.current_request.query_params
-    token = json.pop('token')
+    try:
+        token = json.pop('token')
+        response_url = json.pop('response_url')
+    except KeyError:
+        logger.info(json)
+        logger.info('external request')
     logger.info(json)
 
-    if json.get('response_url') and 'slack' in json['response_url']:
-        if not _is_authenticated_slack(token):
-            logger.info('unauthenticated request')
-            return {'text': 'Sorry, {} only works in Slack!'
-                    ''.format(json['command'])}
+    env = app.current_request.to_dict()['context']['stage']
+    config = credstash.getAllSecrets(context={'env': env, 'app': 'howdoi_'})
+    if not _is_authenticated_slack(token, **config):
+        logger.info('Invalid token')
+        return {'text': 'Sorry, {} only works in Slack!'
+                ''.format(json['command'])}
 
-        text = json['text']
-        response_url = json['response_url']
-        _greet(response_url)
-        query_response = _process_text(text)
-        formatted_response = _format_text(query_response)
-        payload = {'response_type': 'in_channel','text': formatted_response}
-        requests.post(response_url, data=dumps(payload))
-        requests.post(response_url, data=dumps({'response_type': 'in_channel',
-                      'text':'^ How do I {}?'.format(text)}))
+    text = json['text']
+    response_url = json['response_url']
+    _greet(response_url)
+    query_response = _process_text(text)
+    formatted_response = _format_text(query_response, text)
+    payload = {'response_type': 'in_channel','text': formatted_response}
+    requests.post(response_url, data=dumps(payload))
 
 @app.route('/howdoi/json')
 def howdoi_json():
