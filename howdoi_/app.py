@@ -69,7 +69,6 @@ def howdoi_slack():
                 ''.format(json['command'])}
 
     text = json['text']
-    response_url = json['response_url']
     _greet(response_url)
     query_response = _process_text(text)
     formatted_response = _format_text(query_response, text)
