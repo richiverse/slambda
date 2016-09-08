@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from chalice import Chalice
 
 app = Chalice(app_name='confluence')
-app.debug = True
+app.debug = False
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
