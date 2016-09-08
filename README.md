@@ -1,7 +1,8 @@
 # slambda
 Exploring Slack integration apps with AWS Lambda
 
-Since AWS requires python 2.7, I used yyuu's pyenv to install local version of python 2.7.12
+Since Python's AWS Lambda version requires python 2.7, I used yyuu's pyenv to install local version of python 2.7.12. 
+You can also use this tool to switch between python interpreters, including python 3+ and pypy2 or pypy3
 
 ```bash
 pyenv install 2.7.12
