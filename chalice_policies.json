@@ -1,0 +1,24 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:GetFunction",
+                "iam:CreateRole",
+                "iam:DeleteRolePolicy",
+                "iam:ListRoles",
+                "iam:PutRolePolicy",
+                "lambda:AddPermission",
+                "lambda:InvokeFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:CreateFunctionCode",
+                "apigateway:GET",
+                "apigateway:POST",
+                "apigateway:PUT",
+                "apigateway:DELETE"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

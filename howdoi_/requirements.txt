@@ -1,0 +1,5 @@
+chalice
+howdoi
+requests
+futures
+credstash
