@@ -23,14 +23,22 @@ def _connect_confluence(JIRA_USERNAME, JIRA_PASSWORD, **kwargs):
     session.auth=auth
     return session
 
-def _get_content(session, url, query):
+def _add_params(query, space=None, typ='page'):
+    params = {'queryString': query,
+              'cql':'type="{typ}" and siteSearch ~ "{query}"'.format(
+                  typ=typ, query=query.replace('"','\\"'))}
+    if space:
+        params.update({'cql': '{} and space = "{}"'.format(
+            params['cql'], space)})
+    return params
+
+def _get_content(session, url, params):
     """return content from a session query."""
-    params = {'queryString': query}
     response = session.get(url, params=params)
     if response.ok:
         return response.content
     else:
-        return 'No results found for query %s.' % query
+        return 'No results found for query %s.' % str(params)
 
 def _parse_content(content, content_index=157, link_index=5, **kwargs):
     soup = BeautifulSoup(content, 'html.parser')
@@ -75,14 +83,28 @@ def query():
         return {'text': 'Sorry, {} only works in Slack!'
                 ''.format(json['command'])}
 
-    cql = json['text']
     _greet(response_url)
+    cql = json['text']
+    config = credstash.getAllSecrets(context={'env': 'dev', 'app': 'confluence'})
+
+    result = _process(cql, **config)
+    payload = dumps({"response_type": "in_channel", "text": result })
+    requests.post(response_url, data=payload)
+
+def _process(cql, **config):
     session = _connect_confluence(**config)
     url = ('https://{JIRA_CLIENT_URL}/wiki/dosearchsite.action'
            ''.format(**config))
-    content = _get_content(session, url, cql)
+    add_params = _add_params(cql, space=config.get('SPACE'))
+    content = _get_content(session, url, add_params)
     parsed_content = _parse_content(content, **config)
-    result = ('{}\n\n*View all ->* {}?queryString={}\n\n^ /wiki {}'
-              ''.format(parsed_content, url, urllib.quote_plus(cql), cql))
-    payload = {"response_type": "in_channel", "text": result }
-    requests.post(response_url, data=dumps(payload))
+    result = ('{}\n\n*View all ->* {}?{}\n\n^ /wiki {}'
+              ''.format(parsed_content, url, urllib.urlencode(add_params), cql))
+    return result
+
+if __name__ == '__main__':
+    import sys
+    cql = sys.argv[1]
+    config = credstash.getAllSecrets(context={'env': 'dev', 'app': 'confluence'})
+    result = _process(cql, **config)
+    print(result)
